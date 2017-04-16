@@ -152,17 +152,19 @@
 			that._execEvent('zoomEnd');
 		}, 400);
 
-		if ( 'deltaX' in e ) {
-			wheelDeltaY = -e.deltaY / Math.abs(e.deltaY);
-		} else if ('wheelDeltaX' in e) {
-			wheelDeltaY = e.wheelDeltaY / Math.abs(e.wheelDeltaY);
-		} else if('wheelDelta' in e) {
-			wheelDeltaY = e.wheelDelta / Math.abs(e.wheelDelta);
-		} else if ('detail' in e) {
-			wheelDeltaY = -e.detail / Math.abs(e.wheelDelta);
-		} else {
-			return;
-		}
+		// https://github.com/cubiq/iscroll/issues/1001
+		var normalizeWheelSpeed = function(event) {
+		   var normalized;
+	    if (event.wheelDelta) {
+	        normalized = (event.wheelDelta % 120 - 0) == -0 ? event.wheelDelta / 120 : event.wheelDelta / 12;
+	    } else {
+	        var rawAmmount = event.deltaY ? event.deltaY : event.detail;
+	        normalized = -(rawAmmount % 3 ? rawAmmount * 10 : rawAmmount / 3);
+	    }
+	    return normalized;
+		};
+
+		wheelDeltaY = normalizeWheelSpeed(e);
 
 		deltaScale = this.scale + wheelDeltaY / 5;
 
